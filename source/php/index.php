@@ -3,7 +3,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<!--BASE SEO-->
+    <!--BASE SEO-->
     <meta name="robots" content="follow , index"/>
     <meta name="description" content=""/>
 
@@ -12,5 +12,13 @@
     <link rel="stylesheet" type="text/css" media="all" href="dist/css/style.css"/>
 
 </head>
+
 <body>
+
+<h1>Projeto automação front-end</h1>
+
+<script src="dist/js/app.js"></script>
+</body>
+</html>
+
 

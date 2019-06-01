@@ -3,76 +3,58 @@ var sass = require("gulp-sass");
 var autoprefixer = require('gulp-autoprefixer');
 var notify = require("gulp-notify");
 var htmlmin = require('gulp-htmlmin');
-var imagemin = require('gulp-imagemin');
 var cache = require('gulp-cache');
 var concat = require('gulp-concat');
 var reset_heroi = require('browser-sync').create();
 
-// Transforma o Sass da pasta source(desenvolvimento) em CSS levando para a pasta dist(produção)
+// Transforma o Sass(SCSS) da pasta source em CSS levando para a pasta dist (Pasta de Produção)
 gulp.task('thor', function () {
-    return gulp.src('./source/sass/*.scss')
+    return gulp.src('./source/sass/**')
         .pipe(sass({outputStyle: 'compressed'}))
         .pipe(autoprefixer({browsers:['last 4 version'], cascade:false}))
         .on('error', notify.onError({
-            title: 'Erro no Scss, presta atenção!',
+            title: 'Erro no Scss, há erros no teu código!',
             message: '<%= error.message %>'
         }))
         .pipe(gulp.dest('./dist/css'))
         .pipe(reset_heroi.stream());
 });
 
-// Minifica o Javascript da pasta source(desenvolvimento) levando para a pasta dist(produção)
+// Minifica o Javascript/Jquery da pasta source levando para a pasta dist/js (Pasta de Produção)
 gulp.task('mulher-elastico', function () {
     return gulp.src([
-        // *** OBS: Não alterar ordem ***
+        // *** OBS: Ordem que será adicionado os arquivos minificados ***
         './node_modules/jquery/dist/jquery.js',
         './node_modules/bootstrap/dist/js/bootstrap.bundle.js',
         './node_modules/bootstrap/dist/js/bootstrap.js',
-        './source/js/*.js'
+        './source/js/**'
         ]
     )
-        .pipe(concat('main.js'))
+        //Nome do arquivo final
+        .pipe(concat('app.js'))
+        // local do arquivo final
         .pipe(gulp.dest('./dist/js'));
 });
 
-// Minifica o HTML da pasta source(desenvolvimento) para a pasta raíz do projeto
+// Minifica o HTML/PHP da pasta source levando para a pasta ./ (Pasta de Produção)
 gulp.task('stan-lee', function () {
-    return gulp.src('./source/php/*.php')
+    return gulp.src('./source/php/**')
         .pipe(htmlmin({collapseWhitespace: true}))
         .pipe(gulp.dest('./'));
 });
 
-// Comprime as imagens da pasta img e colocando na pasta img-comprimida
-gulp.task('ant-man', function () {
-    return gulp.src("./source/img/*")
-        .pipe(imagemin())
-        .pipe(gulp.dest("./dist/img"))
-});
 
 // Atualiza o navegador automaticamente
 gulp.task('reset_heroi', function () {
     reset_heroi.init({
 
-        // INFORME O LOCAL DA PASTA DO PROJETO
-        proxy:   AQUI SERÁ A PASTA DO PROJETO ENTRE ASPAS,
+        // local do projeto, pasta que será atualizada conforme save do desenvolvedor
+        proxy:'informar-local-da-pasta',
 
-        // 1 - Para testar em mobile adicione o nome do
-        // projeto trabalhado no momento, ADICIONE O NOME
-        // EM "" NA TAG TUNNEL
+        // ABRIR UM LINK em varios aparelhos na mesma rede.
+        // open: "external
 
-        //2 - DESCOMENTE A TAG "TUNNEL LOGO  ABAIXO"
-
-        // tunnel:  "projeto-teste-dev",
-
-        //Preferencia de abertura de link
-
-        // ABRIR NO LOCALHOST
-        // open: "local"
-
-        // ABRIR UM LINK NA REDE INTRANET DA EMPRESA,
-        // DISPONIVEL PARA APARELHOS NA REDE
-        // open: "tunnel
-        open:    "local",
+        open:"external",
     })
 });
 
@@ -81,22 +63,18 @@ gulp.task('flash', () =>
     cache.clearAll()
 );
 
-// Assiste as tasks
-
+//Tasks para atualizar os arquivos conforme alteração do projeto
 gulp.task('demolidor', function () {
-    gulp.watch('./source/sass/*.scss', gulp.parallel('thor','flash'));
-    gulp.watch('./source/js/**/*.js', gulp.parallel('mulher-elastico','flash')).on('change', reset_heroi.reload);
-    gulp.watch('./source/img/*', gulp.parallel('ant-man','flash')).on('change', reset_heroi.reload);
-    gulp.watch('./source/php/*.php', gulp.parallel('stan-lee','flash')).on('change', reset_heroi.reload);
+    gulp.watch('./source/sass/**', gulp.parallel('thor','flash'));
+    gulp.watch('./source/js/**/**', gulp.parallel('mulher-elastico','flash')).on('change', reset_heroi.reload);
+    gulp.watch('./source/php/**', gulp.parallel('stan-lee','flash')).on('change', reset_heroi.reload);
 });
 
-// Chama as tasks
-
+//Tasks default inicializa todas as tasks.
 gulp.task('default',
     gulp.parallel(
         'thor',
         'mulher-elastico',
-        'ant-man',
         'demolidor',
         'stan-lee',
         'flash',
