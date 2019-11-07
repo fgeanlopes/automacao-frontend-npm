@@ -1,42 +1,62 @@
 var gulp = require("gulp");
 var sass = require("gulp-sass");
 var autoprefixer = require('gulp-autoprefixer');
-var notify = require("gulp-notify");
 var htmlmin = require('gulp-htmlmin');
 var cache = require('gulp-cache');
 var concat = require('gulp-concat');
 var reset_heroi = require('browser-sync').create();
 
-// Transforma o Sass(SCSS) da pasta source em CSS levando para a pasta dist (Pasta de Produção)
+// Transforma o Sass da pasta source(desenvolvimento) em CSS levando para a pasta dist(produção)
 gulp.task('thor', function () {
-    return gulp.src('./source/sass/**')
+    return gulp.src([
+        './source/sass/**',
+        './node_modules/owl.carousel/dist/assets/owl.carousel.css',
+        './node_modules/owl.carousel/dist/assets/owl.theme.default.css',
+        ]
+    )
         .pipe(sass({outputStyle: 'compressed'}))
-        .pipe(autoprefixer({browsers:['last 4 version'], cascade:false}))
-        .on('error', notify.onError({
-            title: 'Erro no Scss, há erros no teu código!',
-            message: '<%= error.message %>'
+        .pipe(autoprefixer({
+            "overrideBrowserslist": [
+                "> 1%",
+                "ie >= 8",
+                "edge >= 15",
+                "ie_mob >= 10",
+                "ff >= 45",
+                "chrome >= 45",
+                "safari >= 7",
+                "opera >= 23",
+                "ios >= 7",
+                "android >= 4",
+                "bb >= 10"
+              ], cascade:false
+        
         }))
+        .pipe(concat('style.css'))
         .pipe(gulp.dest('./dist/css'))
         .pipe(reset_heroi.stream());
 });
 
-// Minifica o Javascript/Jquery da pasta source levando para a pasta dist/js (Pasta de Produção)
+
+// Minifica o Javascript da pasta source(desenvolvimento) levando para a pasta dist(produção)
 gulp.task('mulher-elastico', function () {
     return gulp.src([
-        // *** OBS: Ordem que será adicionado os arquivos minificados ***
+        // *** OBS: Não alterar ordem ***
         './node_modules/jquery/dist/jquery.js',
+        './node_modules/owl.carousel/dist/owl.carousel.js',
         './node_modules/bootstrap/dist/js/bootstrap.bundle.js',
         './node_modules/bootstrap/dist/js/bootstrap.js',
-        './source/js/**'
+        './source/js/navbar.js',
+        './source/js/auto_margin_navbar.js',
+        './source/js/exportar_svg_wordpress.js',
+        './source/js/efeito_hover_navbar.js',
+        './source/js/main.js',
         ]
     )
-        //Nome do arquivo final
         .pipe(concat('app.js'))
-        // local do arquivo final
         .pipe(gulp.dest('./dist/js'));
 });
 
-// Minifica o HTML/PHP da pasta source levando para a pasta ./ (Pasta de Produção)
+// Minifica o HTML da pasta source(desenvolvimento) para a pasta raíz do projeto
 gulp.task('stan-lee', function () {
     return gulp.src('./source/php/**')
         .pipe(htmlmin({collapseWhitespace: true}))
@@ -48,13 +68,9 @@ gulp.task('stan-lee', function () {
 gulp.task('reset_heroi', function () {
     reset_heroi.init({
 
-        // local do projeto, pasta que será atualizada conforme save do desenvolvedor
-        proxy:'informar-local-da-pasta',
-
-        // ABRIR UM LINK em varios aparelhos na mesma rede.
-        // open: "external
-
-        open:"external",
+        // INFORME O LOCAL DA PASTA DO PROJETO
+        proxy:   'localhost/site-teste',
+        open:    "external",
     })
 });
 
@@ -63,14 +79,15 @@ gulp.task('flash', () =>
     cache.clearAll()
 );
 
-//Tasks para atualizar os arquivos conforme alteração do projeto
+// Assiste as tasks
+
 gulp.task('demolidor', function () {
     gulp.watch('./source/sass/**', gulp.parallel('thor','flash'));
     gulp.watch('./source/js/**/**', gulp.parallel('mulher-elastico','flash')).on('change', reset_heroi.reload);
-    gulp.watch('./source/php/**', gulp.parallel('stan-lee','flash')).on('change', reset_heroi.reload);
+   gulp.watch('./source/php/**', gulp.parallel('stan-lee','flash')).on('change', reset_heroi.reload);
 });
 
-//Tasks default inicializa todas as tasks.
+// Chama as tasks
 gulp.task('default',
     gulp.parallel(
         'thor',
